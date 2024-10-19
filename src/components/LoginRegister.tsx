@@ -119,7 +119,9 @@ const LoginRegister: React.FC = () => {
   };
 
   const signInWithGoogle = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
+    const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: {
+      redirectTo: 'http://localhost:3004/home' }
+    });
 
     if (error) {
       ShowModal('Failed to sign in with Google', error.message);
@@ -130,7 +132,9 @@ const LoginRegister: React.FC = () => {
   };
 
   const signInWithGithub = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({ provider: 'github' });
+    const { error } = await supabase.auth.signInWithOAuth({ provider: 'github', options: {
+      redirectTo: 'http://localhost:3004/home' }
+    });
     
     if (error) {
       ShowModal('Failed to sign in with GitHub', error.message);
@@ -141,7 +145,9 @@ const LoginRegister: React.FC = () => {
   };
 
   const signInWithDiscord = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({ provider: 'discord' });
+    const { error } = await supabase.auth.signInWithOAuth({ provider: 'discord', options: {
+      redirectTo: 'http://localhost:3004/home' }
+    });
 
     if (error) {
       ShowModal('Failed to sign in with Discord', error.message);
