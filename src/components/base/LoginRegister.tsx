@@ -15,12 +15,13 @@ import GoogleIcon from '@mui/icons-material/Google';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import API from '../../database/API';
 import { useNavigate } from 'react-router-dom';
-import InfoModal, { InfoModalState } from './InfoModal';
+import InfoModal, { InfoModalState, useModal } from './InfoModal';
 import supabase from '../../database/supabase-config';
 
 const LoginRegister: React.FC = () => {
   const [tabsValue, setTabsValue] = useState<number>(0);
   const navigate = useNavigate();
+  const { showModal } = useModal();
 
   const loginEmailRef = React.createRef<HTMLInputElement>();
   const loginPasswordRef = React.createRef<HTMLInputElement>();
@@ -29,16 +30,9 @@ const LoginRegister: React.FC = () => {
   const registerPasswordRef = React.createRef<HTMLInputElement>();
   const registerConfirmPasswordRef = React.createRef<HTMLInputElement>();
 
-  // There's only one modal on this page: an InfoModal for showing errors
-  const [modalState, setModalState] = useState<InfoModalState | null>(null);
-
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabsValue(newValue);
   };
-
-  function ShowModal(title: string, message: string) {
-    setModalState({ open: true, title, message });
-  }
 
   const handleRegister = () => {
     const email: string | undefined = registerEmailRef.current?.value;
@@ -46,34 +40,34 @@ const LoginRegister: React.FC = () => {
     const confirmPassword: string | undefined = registerConfirmPasswordRef.current?.value;
     
     if (!email || email.length === 0) {
-      ShowModal('Failed to register', 'Email field cannot be empty');
+      showModal('Failed to register', 'Email field cannot be empty');
       return;
     }
 
     if (!password) {
-      ShowModal('Failed to register', 'Password field cannot be empty');
+      showModal('Failed to register', 'Password field cannot be empty');
       return;
     }
 
     if (!confirmPassword) {
-      ShowModal('Failed to register', 'Confirm password field cannot be empty');
+      showModal('Failed to register', 'Confirm password field cannot be empty');
       return;
     }
 
     if (password.length < 8) {
-      ShowModal('Failed to register', 'Password must be at least 8 characters long');
+      showModal('Failed to register', 'Password must be at least 8 characters long');
       return;
     }
 
     const hasLetter = /[a-zA-Z]/.test(password);
     const hasNumber = /\d/.test(password);
     if (!hasLetter || !hasNumber) {
-      ShowModal('Failed to register', 'Password must contain at least one letter and one number');
+      showModal('Failed to register', 'Password must contain at least one letter and one number');
       return;
     }
 
     if (password !== confirmPassword) {
-      ShowModal('Failed to register', 'Passwords do not match');
+      showModal('Failed to register', 'Passwords do not match');
       return;
     }
 
@@ -81,14 +75,14 @@ const LoginRegister: React.FC = () => {
       if (successful) {
         navigate('/home');
       } else {
-        ShowModal('Failed to register', 'Internal server error. Please contact the developer.');
+        showModal('Failed to register', 'Internal server error. Please contact the developer.');
       }
     }).catch((error: Error) => {
       if (error.message === "User already registered") {
-        ShowModal('Failed to register', 'User already registered. Try the login instead');
+        showModal('Failed to register', 'User already registered. Try the login instead');
         return;
       } else {
-        ShowModal('Failed to register', 'Internal server error. Please contact the developer.');
+        showModal('Failed to register', 'Internal server error. Please contact the developer.');
       }
     });
   };
@@ -111,10 +105,10 @@ const LoginRegister: React.FC = () => {
       if (successful) {
         navigate('/home');
       } else {
-        ShowModal('Login failed', 'Email or password is incorrect');
+        showModal('Login failed', 'Email or password is incorrect');
       }
     }).catch((error: Error) => {
-      ShowModal('Login failed', 'Internal server error. Please contact the developer.');
+      showModal('Login failed', 'Internal server error. Please contact the developer.');
     });
   };
 
@@ -124,7 +118,7 @@ const LoginRegister: React.FC = () => {
     });
 
     if (error) {
-      ShowModal('Failed to sign in with Google', error.message);
+      showModal('Failed to sign in with Google', error.message);
     } else {
       // Sign in successful
       navigate('/home');
@@ -137,7 +131,7 @@ const LoginRegister: React.FC = () => {
     });
     
     if (error) {
-      ShowModal('Failed to sign in with GitHub', error.message);
+      showModal('Failed to sign in with GitHub', error.message);
     } else {
       // Sign in successful
       navigate('/home');
@@ -150,7 +144,7 @@ const LoginRegister: React.FC = () => {
     });
 
     if (error) {
-      ShowModal('Failed to sign in with Discord', error.message);
+      showModal('Failed to sign in with Discord', error.message);
     } else {
       // Sign in successful
       navigate('/home');
@@ -326,11 +320,6 @@ const LoginRegister: React.FC = () => {
           </Box>
         </Paper>
       </Container>
-
-      <InfoModal
-        state={ modalState }
-        onClose={ () => setModalState(null) }
-      />
     </div>
   );
 };

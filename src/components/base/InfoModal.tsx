@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button } from '@mui/material';
 
 export interface InfoModalState {
@@ -7,19 +7,47 @@ export interface InfoModalState {
   message: string;
 }
 
+interface ModalContextType {
+  showModal: (title: string, message: string) => void;
+}
+
+// Create a context for the modal
+const ModalContext = createContext<ModalContextType | undefined>(undefined);
+
+export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [modalState, setModalState] = useState<InfoModalState | null>(null);
+
+  const showModal = (title: string, message: string) => {
+    setModalState({ open: true, title, message });
+  };
+
+  const handleClose = () => {
+    setModalState(null);
+  };
+
+  return (
+    <ModalContext.Provider value={{ showModal }}>
+      {children}
+      <InfoModal state={modalState} onClose={handleClose} />
+    </ModalContext.Provider>
+  );
+};
+
+// Custom hook to use modal context
+export const useModal = () => {
+  const context = useContext(ModalContext);
+  if (context === undefined) {
+    throw new Error('useModal must be used within a ModalProvider');
+  }
+  return context;
+};
+
 interface InfoModalProps {
-  /**
-   * If null, the modal will be closed
-   */
   state: InfoModalState | null;
-  /**
-   * If there is a hook keeping track of whether the modal is opened or closed,
-   * this function should be called to close the modal.
-   */
   onClose: () => void;
 }
 
-const InfoModal: React.FC<InfoModalProps> = ({ state, onClose } : InfoModalProps) => {
+const InfoModal: React.FC<InfoModalProps> = ({ state, onClose }) => {
   return (
     <Dialog
       open={state?.open || false}
@@ -28,7 +56,7 @@ const InfoModal: React.FC<InfoModalProps> = ({ state, onClose } : InfoModalProps
       aria-describedby="error-dialog-description"
       sx={{
         '& .MuiDialog-paper': {
-          minWidth: 'min(425px, 80vw)'
+          minWidth: 'min(425px, 80vw)',
         },
       }}
     >
