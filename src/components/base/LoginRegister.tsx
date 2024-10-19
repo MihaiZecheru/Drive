@@ -119,9 +119,6 @@ const LoginRegister: React.FC = () => {
 
     if (error) {
       showModal('Failed to sign in with Google', error.message);
-    } else {
-      // Sign in successful
-      navigate('/home');
     }
   };
 
@@ -132,9 +129,6 @@ const LoginRegister: React.FC = () => {
     
     if (error) {
       showModal('Failed to sign in with GitHub', error.message);
-    } else {
-      // Sign in successful
-      navigate('/home');
     }
   };
 
@@ -145,9 +139,6 @@ const LoginRegister: React.FC = () => {
 
     if (error) {
       showModal('Failed to sign in with Discord', error.message);
-    } else {
-      // Sign in successful
-      navigate('/home');
     }
   };
 
