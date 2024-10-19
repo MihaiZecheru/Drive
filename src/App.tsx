@@ -1,9 +1,9 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Authenticator from './components/Authenticator';
-import Home from './components/Home';
-import LoginRegister from './components/LoginRegister';
-import Landing from './components/Landing';
-import Logout from './components/Logout';
+import Authenticator from './components/base/Authenticator';
+import Home from './components/base/Home';
+import LoginRegister from './components/base/LoginRegister';
+import Landing from './components/base/Landing';
+import Logout from './components/base/Logout';
 
 function App() {
   return (

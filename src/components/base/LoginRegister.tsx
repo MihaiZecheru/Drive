@@ -13,10 +13,10 @@ import {
 } from '@mui/material';
 import GoogleIcon from '@mui/icons-material/Google';
 import GitHubIcon from '@mui/icons-material/GitHub';
-import API from '../database/API';
+import API from '../../database/API';
 import { useNavigate } from 'react-router-dom';
 import InfoModal, { InfoModalState } from './InfoModal';
-import supabase from '../database/supabase-config';
+import supabase from '../../database/supabase-config';
 
 const LoginRegister: React.FC = () => {
   const [tabsValue, setTabsValue] = useState<number>(0);

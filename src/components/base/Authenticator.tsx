@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import GetUser from '../database/GetUser';
+import GetUser from '../../database/GetUser';
 import { User } from '@supabase/supabase-js';
 
 interface Props {
