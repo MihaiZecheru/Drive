@@ -8,7 +8,7 @@ export interface InfoModalState {
 }
 
 interface ModalContextType {
-  showModal: (title: string, message: string) => void;
+  showInfoModal: (title: string, message: string) => void;
 }
 
 // Create a context for the modal
@@ -17,7 +17,10 @@ const ModalContext = createContext<ModalContextType | undefined>(undefined);
 export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [modalState, setModalState] = useState<InfoModalState | null>(null);
 
-  const showModal = (title: string, message: string) => {
+  /**
+   * Display the modal to the screen with the given title and message.
+   */
+  const showInfoModal = (title: string, message: string) => {
     setModalState({ open: true, title, message });
   };
 
@@ -26,15 +29,17 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   return (
-    <ModalContext.Provider value={{ showModal }}>
+    <ModalContext.Provider value={{ showInfoModal: showInfoModal }}>
       {children}
       <InfoModal state={modalState} onClose={handleClose} />
     </ModalContext.Provider>
   );
 };
 
-// Custom hook to use modal context
-const useModal = () => {
+/**
+ * Hook that returns the showInfoModal function which can be used to display the modal with a title and body message.
+ */
+const useInfoModal = () => {
   const context = useContext(ModalContext);
   if (context === undefined) {
     throw new Error('useModal must be used within a ModalProvider');
@@ -75,4 +80,4 @@ const InfoModal: React.FC<InfoModalProps> = ({ state, onClose }) => {
   );
 };
 
-export default useModal;
+export default useInfoModal;

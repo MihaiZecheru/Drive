@@ -4,7 +4,7 @@ import Home from './components/base/Home';
 import LoginRegister from './components/base/LoginRegister';
 import Landing from './components/base/Landing';
 import Logout from './components/base/Logout';
-import { ModalProvider } from './components/base/useModal';
+import { ModalProvider } from './components/base/useInfoModal';
 
 function App() {
   return (

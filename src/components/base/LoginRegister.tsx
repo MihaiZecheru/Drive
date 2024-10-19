@@ -15,13 +15,13 @@ import GoogleIcon from '@mui/icons-material/Google';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import API from '../../database/API';
 import { useNavigate } from 'react-router-dom';
-import useModal from './useModal';
+import useInfoModal from './useInfoModal';
 import supabase from '../../database/supabase-config';
 
 const LoginRegister: React.FC = () => {
   const [tabsValue, setTabsValue] = useState<number>(0);
   const navigate = useNavigate();
-  const { showModal } = useModal();
+  const { showInfoModal: showModal } = useInfoModal();
 
   const loginEmailRef = React.createRef<HTMLInputElement>();
   const loginPasswordRef = React.createRef<HTMLInputElement>();
