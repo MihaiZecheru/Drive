@@ -21,7 +21,7 @@ import supabase from '../../database/supabase-config';
 const LoginRegister: React.FC = () => {
   const [tabsValue, setTabsValue] = useState<number>(0);
   const navigate = useNavigate();
-  const { showInfoModal: showModal } = useInfoModal();
+  const { showInfoModal } = useInfoModal();
 
   const loginEmailRef = React.createRef<HTMLInputElement>();
   const loginPasswordRef = React.createRef<HTMLInputElement>();
@@ -40,34 +40,34 @@ const LoginRegister: React.FC = () => {
     const confirmPassword: string | undefined = registerConfirmPasswordRef.current?.value;
     
     if (!email || email.length === 0) {
-      showModal('Failed to register', 'Email field cannot be empty');
+      showInfoModal('Failed to register', 'Email field cannot be empty');
       return;
     }
 
     if (!password) {
-      showModal('Failed to register', 'Password field cannot be empty');
+      showInfoModal('Failed to register', 'Password field cannot be empty');
       return;
     }
 
     if (!confirmPassword) {
-      showModal('Failed to register', 'Confirm password field cannot be empty');
+      showInfoModal('Failed to register', 'Confirm password field cannot be empty');
       return;
     }
 
     if (password.length < 8) {
-      showModal('Failed to register', 'Password must be at least 8 characters long');
+      showInfoModal('Failed to register', 'Password must be at least 8 characters long');
       return;
     }
 
     const hasLetter = /[a-zA-Z]/.test(password);
     const hasNumber = /\d/.test(password);
     if (!hasLetter || !hasNumber) {
-      showModal('Failed to register', 'Password must contain at least one letter and one number');
+      showInfoModal('Failed to register', 'Password must contain at least one letter and one number');
       return;
     }
 
     if (password !== confirmPassword) {
-      showModal('Failed to register', 'Passwords do not match');
+      showInfoModal('Failed to register', 'Passwords do not match');
       return;
     }
 
@@ -75,14 +75,14 @@ const LoginRegister: React.FC = () => {
       if (successful) {
         navigate('/home');
       } else {
-        showModal('Failed to register', 'Internal server error. Please contact the developer.');
+        showInfoModal('Failed to register', 'Internal server error. Please contact the developer.');
       }
     }).catch((error: Error) => {
       if (error.message === "User already registered") {
-        showModal('Failed to register', 'User already registered. Try the login instead');
+        showInfoModal('Failed to register', 'User already registered. Try the login instead');
         return;
       } else {
-        showModal('Failed to register', 'Internal server error. Please contact the developer.');
+        showInfoModal('Failed to register', 'Internal server error. Please contact the developer.');
       }
     });
   };
@@ -105,10 +105,10 @@ const LoginRegister: React.FC = () => {
       if (successful) {
         navigate('/home');
       } else {
-        showModal('Login failed', 'Email or password is incorrect');
+        showInfoModal('Login failed', 'Email or password is incorrect');
       }
     }).catch((error: Error) => {
-      showModal('Login failed', 'Internal server error. Please contact the developer.');
+      showInfoModal('Login failed', 'Internal server error. Please contact the developer.');
     });
   };
 
@@ -118,7 +118,7 @@ const LoginRegister: React.FC = () => {
     });
 
     if (error) {
-      showModal('Failed to sign in with Google', error.message);
+      showInfoModal('Failed to sign in with Google', error.message);
     }
   };
 
@@ -128,7 +128,7 @@ const LoginRegister: React.FC = () => {
     });
     
     if (error) {
-      showModal('Failed to sign in with GitHub', error.message);
+      showInfoModal('Failed to sign in with GitHub', error.message);
     }
   };
 
@@ -138,7 +138,7 @@ const LoginRegister: React.FC = () => {
     });
 
     if (error) {
-      showModal('Failed to sign in with Discord', error.message);
+      showInfoModal('Failed to sign in with Discord', error.message);
     }
   };
 
