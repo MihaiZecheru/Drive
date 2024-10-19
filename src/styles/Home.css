@@ -3,3 +3,12 @@ div.home {
   height: 100vh!important;
   width: 100vw!important;
 }
+
+.folder-grid {
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-color: #1976d2;
+  scrollbar-width: thin;
+  max-height: calc(100vh - 6rem);
+  padding-bottom: 5vh!important;
+}
