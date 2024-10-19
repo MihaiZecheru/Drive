@@ -34,7 +34,7 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 };
 
 // Custom hook to use modal context
-export const useModal = () => {
+const useModal = () => {
   const context = useContext(ModalContext);
   if (context === undefined) {
     throw new Error('useModal must be used within a ModalProvider');
@@ -75,4 +75,4 @@ const InfoModal: React.FC<InfoModalProps> = ({ state, onClose }) => {
   );
 };
 
-export default InfoModal;
+export default useModal;

@@ -15,7 +15,7 @@ import GoogleIcon from '@mui/icons-material/Google';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import API from '../../database/API';
 import { useNavigate } from 'react-router-dom';
-import InfoModal, { InfoModalState, useModal } from './InfoModal';
+import useModal from './useModal';
 import supabase from '../../database/supabase-config';
 
 const LoginRegister: React.FC = () => {
