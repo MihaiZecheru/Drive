@@ -23,3 +23,9 @@ yarn-debug.log*
 yarn-error.log*
 
 .env
+
+# google drive server
+gdrive-uploader-server/.env
+gdrive-uploader-server/node_modules
+gdrive-uploader-server/uploads
+gdrive-uploader-server/credentials.json
