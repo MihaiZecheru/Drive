@@ -1,6 +1,7 @@
 import { styled } from '@mui/material/styles';
 import Button from '@mui/material/Button';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
 import '../../styles/Home.css';
 import Folder from '../FolderCard';
 import File from '../FileCard';
@@ -10,6 +11,8 @@ import { TFile, TFolder } from '../../database/types';
 import { useEffect, useState } from 'react';
 import useInfoModal from './useInfoModal';
 import { FolderID } from '../../database/ID';
+import CreateFolderModal from '../FormDialog';
+import useWindowSize from '../useWindowSize';
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -33,9 +36,12 @@ const FolderGrid = styled('div')({
 
 const Home = () => {
   const { showInfoModal } = useInfoModal();
+  const [createFolderModalIsOpen, setCreateFolderModalIsOpen] = useState<boolean>(false);
+  const [rootFolderID, setRootFolderID] = useState<FolderID>(null as unknown as FolderID);
   const [loading, setLoading] = useState<boolean>(true);
   const [folders, setFolders] = useState<TFolder[]>([]);
   const [files, setFiles] = useState<TFile[]>([]);
+  const { width } = useWindowSize();
 
   // Card height + 1rem
   const skeletonHeight = 136;
@@ -58,7 +64,7 @@ const Home = () => {
 
   const uploadFiles = (_files: File[]) => {
     // any file uploaded on this page goes in the root folder
-    const filePromises = _files.map((file: File) => Database.UploadFile('/', file));
+    const filePromises = _files.map(async (file: File) => Database.UploadFile(rootFolderID, file));
     
     Promise.all(filePromises)
       .then((_files: TFile[]) => {
@@ -77,12 +83,15 @@ const Home = () => {
     const start = new Date().getTime();
     Database.GetAllFolders()
       .then((folders: TFolder[]) => {
-        setFolders(folders);
+        setFolders(folders.filter((folder) => folder.name !== '__ROOT__'));
       })
       .catch((error) => {
         console.error(error);
         showInfoModal("Failed to load folders", error.message);
       });
+
+    Database.GetUserRootFolderID()
+      .then((folderID: FolderID) => setRootFolderID(folderID));
 
     Database.GetAllFiles()
       .then((files: TFile[]) => {
@@ -98,10 +107,31 @@ const Home = () => {
       });
   }, [showInfoModal]);
 
+  const launchCreateFolderPopup = () => {
+    setCreateFolderModalIsOpen(true);
+  };
+
+  const createFolder = (folder_name: string) => {
+    Database.CreateFolder(folder_name, rootFolderID)
+      .then((folder: TFolder) => {
+        setFolders([...folders, folder]);
+        setCreateFolderModalIsOpen(false);
+      })
+      .catch((error: Error) => {
+        console.error(error);
+        showInfoModal("Failed to create folder", error.message);
+      });
+  };
+  
   return (
     <div className="home" style={{
       overflow: 'hidden',
     }}>
+      <CreateFolderModal
+        _open={createFolderModalIsOpen}
+        _setOpen={setCreateFolderModalIsOpen}
+        onFolderNameSubmit={(folder_name: string) => createFolder(folder_name)}
+      />
 
       <Paper elevation={24} sx={{
         width: 'auto',
@@ -112,27 +142,45 @@ const Home = () => {
         overflowY: 'hidden',
         backgroundColor: '#1976d2',
       }}>
-        <h1 style={{ 'margin': 0, color: 'white' }}>Saved Documents</h1>
-        <Paper elevation={3}>
-          <Button
-            component="label"
-            role={undefined}
-            variant="contained"
-            tabIndex={-1}
-            startIcon={<CloudUploadIcon />}
-            style={{
-              backgroundColor: '#6A7F98',
-              color: 'white'
-            }}
-          >
-            Upload files
-            <VisuallyHiddenInput
-              type="file"
-              onChange={(event: any) => uploadFiles(Array.from(event.target.files))}
-              multiple
-            />
-          </Button>
-        </Paper>
+        <h1 style={{ 'margin': 0, color: 'white' }} className="no-highlight">Saved Documents</h1>
+        <div className="header-buttons">
+          <Paper elevation={3} sx={{ marginRight: '1rem' }}>
+            <Button
+              component="label"
+              role='button'
+              variant="contained"
+              tabIndex={-1}
+              startIcon={<CreateNewFolderIcon />}
+              onClick={launchCreateFolderPopup}
+              style={{
+                backgroundColor: '#6A7F98',
+                color: 'white',
+              }}
+            >
+              { width > 705 ? 'Create Folder' : '' }
+            </Button>
+          </Paper>
+          <Paper elevation={3}>
+            <Button
+              component="label"
+              role={undefined}
+              variant="contained"
+              tabIndex={-1}
+              startIcon={<CloudUploadIcon />}
+              style={{
+                backgroundColor: '#6A7F98',
+                color: 'white'
+              }}
+            >
+              { width > 705 ? 'Upload Files' : '' }
+              <VisuallyHiddenInput
+                type="file"
+                onChange={(event: any) => uploadFiles(Array.from(event.target.files))}
+                multiple
+              />
+            </Button>
+          </Paper>
+        </div>
       </Paper>
 
       <FolderGrid className="folder-grid">
@@ -157,14 +205,25 @@ const Home = () => {
         }
 
         {
-          !loading && folders.map((folder: TFolder) => {
-            return <Folder name={folder.name} folderID={folder.id} removeItemCallback={removeFolder} />
+          !loading && folders.map((folder: TFolder, index: number) => {
+            return <Folder
+              key={index}
+              name={folder.name}
+              folderID={folder.id}
+              removeItemCallback={removeFolder}
+            />
           })
         }
 
         {
-          !loading && files.map((file: TFile) => {
-            return <File name={file.name} fileType={file.fileType} fileID={file.id} removeItemCallback={removeFile} />
+          !loading && files.map((file: TFile, index: number) => {
+            return <File
+              key={index}
+              name={file.name}
+              fileType={file.type}
+              fileID={file.id}
+              removeItemCallback={removeFile}
+              />
           })
         }
       </FolderGrid>
