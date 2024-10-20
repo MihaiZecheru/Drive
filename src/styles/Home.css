@@ -12,3 +12,10 @@ div.home {
   max-height: calc(100vh - 6rem);
   padding-bottom: 5vh!important;
 }
+
+.header-buttons {
+  display: flex;
+  align-items: center;
+  background-color: #1976d2;
+  color: white;
+}
