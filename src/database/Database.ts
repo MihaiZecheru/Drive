@@ -138,6 +138,8 @@ export default class Database {
 
   public static async CreateFolder(name: string, parent_folder_id: FolderID): Promise<TFolder> {
     const user_id = await GetUserID();
+    name = name.length === 0 ? 'New folder' : name;
+
     const { data, error } = await supabase
       .from('Folders')
       .insert({ user_id, name, parent_folder_id })
