@@ -17,6 +17,7 @@ import API from '../../database/API';
 import { useNavigate } from 'react-router-dom';
 import useInfoModal from './useInfoModal';
 import supabase from '../../database/supabase-config';
+import { GetUserID } from '../../database/GetUser';
 
 const LoginRegister: React.FC = () => {
   const [tabsValue, setTabsValue] = useState<number>(0);
@@ -71,8 +72,17 @@ const LoginRegister: React.FC = () => {
       return;
     }
 
-    API.RegisterUserAsync(email, password).then((successful: boolean) => {
+    API.RegisterUserAsync(email, password).then(async (successful: boolean) => {
       if (successful) {
+        const { error } = await supabase
+          .from('Folders')
+          .insert({ user_id: await GetUserID(), name: '__ROOT__' });
+
+        if (error) {
+          showInfoModal('Failed to register', 'Internal server error. Please contact the developer.');
+          return;
+        }
+
         navigate('/home');
       } else {
         showInfoModal('Failed to register', 'Internal server error. Please contact the developer.');
