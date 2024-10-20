@@ -45,7 +45,7 @@ export default function CreateFolderModal({ _open, _setOpen, onFolderNameSubmit 
             }
 
             handleClose();
-            onFolderNameSubmit(folder_name);
+            onFolderNameSubmit(folder_name.trim());
           },
         }}
       >
