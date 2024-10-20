@@ -30,12 +30,9 @@ const FolderCard = ({ name, folderID, removeItemCallback }: Props) => {
         sx={{
           display: 'flex',
           alignItems: 'center',
-          cursor: 'pointer',
-          userSelect: 'none',
-          WebkitUserSelect: 'none',
-          MozUserSelect: 'none',
-          msUserSelect: 'none'
+          cursor: 'pointer'
         }}
+        className='no-highlight'
         onClick={() => navigate(`/folder/${folderID}`)}
       >
         <FolderIcon sx={{ fontSize: 40, marginRight: 1, color: '#1976d2' }} />

@@ -15,6 +15,12 @@ code {
   width: 100vw;
 }
 
+.no-highlight {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}
+
 .center-of-screen {
   display: flex;
   justify-content: center;

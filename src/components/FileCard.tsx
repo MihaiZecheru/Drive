@@ -58,12 +58,9 @@ const FileCard = ({ name, fileID, fileType, removeItemCallback }: Props) => {
         sx={{
           display: 'flex',
           alignItems: 'center',
-          cursor: 'pointer',
-          userSelect: 'none',
-          WebkitUserSelect: 'none',
-          MozUserSelect: 'none',
-          msUserSelect: 'none'
+          cursor: 'pointer'
         }}
+        className='no-highlight'
         onClick={() => navigate(`/file/${fileID}`)}
       >
         
