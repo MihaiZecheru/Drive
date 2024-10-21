@@ -107,7 +107,8 @@ export default class Database {
 
     const codeExtensions = [
       'js', 'ts', 'py', 'java', 'cpp', 'c', 'cs', 'rb', 'php', 'html', 'css', 'go', 'rs', 'swift', 
-      'kt', 'lua', 'sh', 'bat', 'sql', 'pl', 'r', 'xml', 'json', 'yaml', 'yml', 'toml', 'ini'
+      'kt', 'lua', 'sh', 'bat', 'sql', 'pl', 'r', 'xml', 'json', 'yaml', 'yml', 'toml', 'ini',
+      'jsx', 'tsx', 'ejs', 'h', 'hpp', 'html', 'php', 'xaml'
     ];
 
     if (mimeType.startsWith('image/')) {
