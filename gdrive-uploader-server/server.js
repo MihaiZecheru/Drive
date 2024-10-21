@@ -4,6 +4,7 @@ const multer = require('multer');
 const { google } = require('googleapis');
 const cors = require('cors');
 const fs = require('fs');
+const axios = require('axios');
 
 const dotenv = require('dotenv');
 dotenv.config();
@@ -31,7 +32,11 @@ const authorize = async () => {
   await jwtClient.authorize();
 };
 
-authorize(); // Call authorize on startup
+// Call authorize on startup
+authorize();
+
+// Reauthorize every 30 minutes
+setInterval(authorize, 1000 * 60 * 50);
 
 app.get('/', (req, res) => {
   res.send('App online. Use /gdrive/upload to upload a file');
@@ -69,6 +74,43 @@ app.post('/gdrive/upload', upload.single('file'), async (req, res) => {
   } catch (error) {
     console.error('Error uploading file:', error);
     res.status(500).send('Error uploading file');
+  }
+});
+
+/**
+ * File ID is the ID of the file in Google Drive
+ */
+app.get('/gdrive/download/:file_id', async (req, res) => {
+  const { file_id } = req.params;
+
+  try {
+    // Ensure JWT client is authorized
+    if (!jwtClient.credentials || !jwtClient.credentials.access_token) {
+      await jwtClient.authorize();
+    }
+
+    const url = `https://www.googleapis.com/drive/v3/files/${file_id}?alt=media`;
+
+    // Download the file as a stream
+    const response = await axios({
+      url,
+      method: 'GET',
+      headers: { Authorization: `Bearer ${jwtClient.credentials.access_token}` },
+      responseType: 'stream',  // Axios handles the stream correctly
+    });
+
+    // Set appropriate headers (optional)
+    res.set({
+      'Content-Type': response.headers['content-type'],
+      'Content-Length': response.headers['content-length'],
+    });
+
+    // Pipe the file stream directly to the response
+    response.data.pipe(res);
+
+  } catch (error) {
+    console.error('Error fetching file:', error.message);
+    res.status(500).send('Error fetching file');
   }
 });
 
