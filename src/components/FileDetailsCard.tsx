@@ -7,21 +7,25 @@ import {
   PictureAsPdf as PdfIcon,
   Description as DefaultFileIcon,
 } from '@mui/icons-material';
-import { FileID } from '../database/ID';
 import DeleteItemButton from './DeleteItemButton';
-import OpenItemButton from './OpenItemButton';
 import { useNavigate } from 'react-router-dom';
 import { TFile } from '../database/types';
+import DownloadItemButton from './DownloadItemButton';
+import { FolderID } from '../database/ID';
 
 interface Props {
   file: TFile;
   /**
-   * Custom logic for after the item is removed in the database. Can be used to update the display.
+   * Typically 300px, but is set to 100% to fit the size of the attachment on the viewFilePage.
    */
-  removeItemCallback: ((itemID: FileID) => void);
+  width: '300px' | '100%';
+  /**
+   * The ID of the user's root folder. Will be null if it hasn't loaded yet.
+   */
+  userRootFolderID: FolderID | null;
 }
 
-const FileCard = ({ file, removeItemCallback }: Props) => {
+const FileDetailsCard = ({ file, width, userRootFolderID }: Props) => {
   const navigate = useNavigate();
 
   const iconStyle = { fontSize: 40, marginRight: 1, color: '#1976d2' };
@@ -46,8 +50,9 @@ const FileCard = ({ file, removeItemCallback }: Props) => {
   return (
     <Card
       sx={{
-        maxWidth: '300px',
-        width: '300px',
+        maxWidth: width,
+        minWidth: '300px',
+        width: width,
         height: '120px',
         borderRadius: '8px',
         boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
@@ -90,11 +95,18 @@ const FileCard = ({ file, removeItemCallback }: Props) => {
           borderTop: '1px solid #e0e0e0',
         }}
       >
-        <OpenItemButton itemID={file.id} itemType="file"></OpenItemButton>
-        <DeleteItemButton itemID={file.id} itemType="file" removeItemCallback={removeItemCallback}/>
+        <DownloadItemButton file={file}></DownloadItemButton>
+        <DeleteItemButton itemID={file.id} itemType="file" removeItemCallback={
+          () => {
+            if (userRootFolderID && file.folder_id === userRootFolderID)
+              navigate('/home');
+            else
+              navigate(`/folder/${file.folder_id}`)
+          }
+        }/>
       </CardActions>
     </Card>
   );
 };
 
-export default FileCard;
+export default FileDetailsCard;

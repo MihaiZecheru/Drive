@@ -1,5 +1,5 @@
 import { GetUserID } from "./GetUser";
-import UploadFileToGDrive from "./GoogleDrive";
+import { UploadFileToGDrive } from "./GoogleDrive";
 import { FileID, FolderID } from "./ID";
 import supabase from "./supabase-config";
 import { TFile, TFileType, TFolder } from "./types";
@@ -88,7 +88,7 @@ export default class Database {
         name: file.name,
         type: this.GetFileType(file),
         size: file.size,
-        local_folder_id: parent_folder_ID,
+        folder_id: parent_folder_ID,
         gdrive_file_id
       }).select();
 
@@ -147,6 +147,20 @@ export default class Database {
 
     if (error) throw error;
     return data[0] as TFolder;
-    
+  }
+
+  /**
+   * Get a file from the supabase database (not from gdrive)
+   */
+  public static async GetFile(file_id: FileID): Promise<TFile> {
+    const { data, error } = await supabase
+      .from('Files')
+      .select('*')
+      .eq('id', file_id)
+      .eq('user_id', await GetUserID());
+
+    if (error) throw error;
+    if (data!.length === 0) throw new Error('File does not exist');
+    return data![0] as TFile;
   }
 }

@@ -6,7 +6,10 @@ import Database from "../database/Database";
 interface Props {
   itemID: FolderID | FileID;
   itemType: "folder" | "file";
-  removeItemCallback: (itemID: FolderID | FileID) => void;
+  /**
+   * Custom logic for after the item is removed in the database. Can be used to update the display.
+   */
+  removeItemCallback: ((itemID: FolderID | FileID) => void) | null;
 }
 
 const DeleteItemButton = ({ itemID, itemType, removeItemCallback }: Props) => {
@@ -20,9 +23,9 @@ const DeleteItemButton = ({ itemID, itemType, removeItemCallback }: Props) => {
       promise = Database.DeleteFile(itemID as FileID);
     }
 
-    promise
-      .then(() => removeItemCallback(itemID))
-      .catch((error) => {
+    promise.then(() => {
+        if (removeItemCallback) removeItemCallback(itemID)
+      }).catch((error) => {
         showInfoModal("Failed to delete folder", error.message);
       });
   };

@@ -5,7 +5,7 @@ import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
 import '../../styles/Home.css';
 import Folder from '../FolderCard';
 import File from '../FileCard';
-import { Paper, Skeleton } from '@mui/material';
+import { CircularProgress, Paper, Skeleton, Tooltip } from '@mui/material';
 import Database from '../../database/Database';
 import { TFile, TFolder } from '../../database/types';
 import { useEffect, useState } from 'react';
@@ -39,6 +39,7 @@ const Home = () => {
   const [createFolderModalIsOpen, setCreateFolderModalIsOpen] = useState<boolean>(false);
   const [rootFolderID, setRootFolderID] = useState<FolderID>(null as unknown as FolderID);
   const [loading, setLoading] = useState<boolean>(true);
+  const [uploadingCount, setUploadingCount] = useState<number>(0);
   const [folders, setFolders] = useState<TFolder[]>([]);
   const [files, setFiles] = useState<TFile[]>([]);
   const { width } = useWindowSize();
@@ -63,16 +64,19 @@ const Home = () => {
   };
 
   const uploadFiles = (_files: File[]) => {
+    setUploadingCount(_files.length);
     // any file uploaded on this page goes in the root folder
     const filePromises = _files.map(async (file: File) => Database.UploadFile(rootFolderID, file));
     
     Promise.all(filePromises)
       .then((_files: TFile[]) => {
         setFiles([...files, ..._files]);
+        setUploadingCount(0);
       })
       .catch((error) => {
         console.error(error);
         showInfoModal("Failed to upload files", error.message);
+        setUploadingCount(0);
       });
   };
 
@@ -142,7 +146,9 @@ const Home = () => {
         overflowY: 'hidden',
         backgroundColor: '#1976d2',
       }}>
-        <h1 style={{ 'margin': 0, color: 'white' }} className="no-highlight">Saved Documents</h1>
+        <Tooltip title="Currently viewing the root folder" placement='left-end'>
+          <h1 style={{ 'margin': 0, color: 'white' }} className="no-highlight">Saved Documents</h1>
+        </Tooltip>
         <div className="header-buttons">
           <Paper elevation={3} sx={{ marginRight: '1rem' }}>
             <Button
@@ -172,11 +178,15 @@ const Home = () => {
                 color: 'white'
               }}
             >
-              { width > 705 ? 'Upload Files' : '' }
+              <span style={uploadingCount > 0 ? { marginRight: '.5rem' } : undefined}>
+                { width > 705 ? 'Upload Files' : '' }
+              </span>
+              { uploadingCount > 0 && <CircularProgress size={20} color='inherit'/> }
               <VisuallyHiddenInput
                 type="file"
                 onChange={(event: any) => uploadFiles(Array.from(event.target.files))}
                 multiple
+                disabled={uploadingCount > 0}
               />
             </Button>
           </Paper>
@@ -219,12 +229,24 @@ const Home = () => {
           !loading && files.map((file: TFile, index: number) => {
             return <File
               key={index}
-              name={file.name}
-              fileType={file.type}
-              fileID={file.id}
+              file={file}
               removeItemCallback={removeFile}
-              />
+            />
           })
+        }
+
+        {
+          uploadingCount > 0 && new Array(uploadingCount).fill(0).map((_, index) => (
+            <Tooltip title={`Uploading file${uploadingCount === 0 ? '' : 's'}... please be patient`} placement='top' key={`tooltip-${index}`}>
+              <Skeleton
+                key={`skeleton-${index}`}
+                variant="rectangular" 
+                width={300} 
+                height={120} 
+                sx={{ borderRadius: '.5rem' }}
+              />
+            </Tooltip>
+          ))
         }
       </FolderGrid>
 

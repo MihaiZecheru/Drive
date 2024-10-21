@@ -1,4 +1,4 @@
-import { Card, CardContent, Typography, CardActions } from '@mui/material';
+import { Card, CardContent, Typography, CardActions, Tooltip } from '@mui/material';
 import { Folder as FolderIcon } from '@mui/icons-material';
 import { FolderID } from '../database/ID';
 import DeleteItemButton from './DeleteItemButton';
@@ -36,18 +36,20 @@ const FolderCard = ({ name, folderID, removeItemCallback }: Props) => {
         onClick={() => navigate(`/folder/${folderID}`)}
       >
         <FolderIcon sx={{ fontSize: 40, marginRight: 1, color: '#1976d2' }} />
-        <Typography
-          variant="h6"
-          component="div"
-          sx={{
-            maxWidth: 'calc(100% - 48px)',
-            overflow: 'hidden',
-            whiteSpace: 'nowrap',
-            textOverflow: 'ellipsis',
-          }}
-        >
-          {name}
-        </Typography>
+        <Tooltip title={name} placement="top-start">
+          <Typography
+            variant="h6"
+            component="div"
+            sx={{
+              maxWidth: 'calc(100% - 48px)',
+              overflow: 'hidden',
+              whiteSpace: 'nowrap',
+              textOverflow: 'ellipsis',
+            }}
+          >
+            {name}
+          </Typography>
+        </Tooltip>
       </CardContent>
       <CardActions
         sx={{

@@ -15,7 +15,7 @@ const OpenItemButton = ({ itemID, itemType }: Props) => {
   };
   
   return (
-    <IconButton size="small" onClick={openItem}>Open</IconButton>
+    <IconButton size="small" onClick={openItem}>{ itemType === 'folder' ? 'Open' : 'View'}</IconButton>
   );
 }
  

@@ -25,6 +25,7 @@ export async function UploadFileToGDrive(file: File): Promise<string> {
 }
 
 /**
+ * Get a file from Google Drive in Blob format. Used for downloading.
  * @param fileID The ID of the file in google drive
  */
 export async function GetFileFromGDrive(fileID: string): Promise<Blob> {

@@ -5,6 +5,7 @@ import LoginRegister from './components/base/LoginRegister';
 import Landing from './components/base/Landing';
 import Logout from './components/base/Logout';
 import { ModalProvider } from './components/base/useInfoModal';
+import ViewFilePage from './components/ViewFilePage';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
 
           { /* Restricted access - authentication required */ }
           <Route path="/home" element={ <Authenticator component={ <Home /> } /> } />
+          <Route path="/file/:id" element={ <Authenticator component={ <ViewFilePage /> } /> } />
         </Routes>
       </Router>
     </ModalProvider>
