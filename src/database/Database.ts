@@ -118,6 +118,8 @@ export default class Database {
       return 'audio';
     } else if (mimeType.startsWith('video/')) {
       return 'video';
+    } else if (mimeType === 'text/plain') {
+      return 'text';
     } else if (codeExtensions.includes(extension)) {
       return 'code';
     } else {

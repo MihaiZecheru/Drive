@@ -1,6 +1,6 @@
 import { FileID, FolderID, UserID } from "./ID";
 
-export type TFileType = "image" | "pdf" | "code" | "audio" | "video" | "other";
+export type TFileType = "image" | "pdf" | "code" | "text" | "audio" | "video" | "other";
 
 /**
  * Represents an entry in the Folders table of the supabase database.

@@ -20,6 +20,7 @@ const ViewFilePage = () => {
   const [fileDoesntExist, setFileDoesntExist] = useState(false);
   const [contentBlob, setContentBlob] = useState<Blob | null>(null);
   const [userRootFolderID, setUserRootFolderID] = useState<FolderID | null>(null);
+  const [textFileContent, setTextFileContent] = useState<string | null>(null);
 
   const popperAnchor = useRef<HTMLButtonElement | null>(null);
   const [popperOpen, setPopperOpen] = useState(false);
@@ -31,14 +32,23 @@ const ViewFilePage = () => {
     Database.GetFile(id as FileID)
       .then(async (_file: TFile) => {
         setFile(_file);
+
         if (_file.user_id === await GetUserID()) {
           setAllowedToView(true);
         }
+
         if (Date.now() - start_ms < min_loading_time) {
           setTimeout(() => setLoading(false), min_loading_time - (Date.now() - start_ms));
         }
+
         GetFileFromGDrive(_file.gdrive_file_id)
-          .then((blob: Blob) => setContentBlob(blob));
+          .then((blob: Blob) => {
+            setContentBlob(blob);
+            if (_file.type === 'text' || _file.type === 'code') {
+              blob.text().then((text: string) => setTextFileContent(text));
+            }
+          });
+        
         Database.GetUserRootFolderID()
           .then((folderID: FolderID) => setUserRootFolderID(folderID));
       })
@@ -54,7 +64,6 @@ const ViewFilePage = () => {
         }
       });
   }, [id, showInfoModal, navigate]);
-
 
   if (!id || id.length === 0) {
     return (
@@ -108,14 +117,14 @@ const ViewFilePage = () => {
             }
 
             {
-              !loading && (file!.type === 'image' || file!.type === 'video') && !contentBlob &&
+              !loading && (['image', 'video', 'text', 'code'].includes(file!.type)) && !contentBlob &&
               <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
                 <Skeleton variant="rectangular" width={300} height={300} />
               </div>
             }
 
             {
-              !loading && (file!.type === 'image' || file!.type === 'video') && contentBlob &&
+              !loading && (file!.type === 'image') && contentBlob &&
               <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
                 
                 <img
@@ -123,6 +132,33 @@ const ViewFilePage = () => {
                   alt={file!.name}
                   style={{ maxWidth: '100%', maxHeight: '50vh' }}
                 />
+              </div>
+            }
+
+            {
+              !loading && (file!.type === 'video') && contentBlob &&
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
+                <video
+                  src={URL.createObjectURL(contentBlob)}
+                  controls
+                  style={{ maxWidth: '100%', maxHeight: '50vh' }}
+                />
+              </div>
+            }
+
+            {
+              !loading && (file!.type === 'text' || file!.type === 'code') && textFileContent &&
+              <div style={{ marginTop: '1rem' }}>
+                <Paper elevation={3} sx={{ maxWidth: '80vw' }}>
+                  <pre style={{
+                    overflow: 'scroll',
+                    padding: '.5rem',
+                    maxWidth: '100%',
+                    maxHeight: '50vh'
+                  }}>
+                    {textFileContent}
+                  </pre>
+                </Paper>
               </div>
             }
           </div>

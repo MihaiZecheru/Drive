@@ -38,6 +38,7 @@ const FileCard = ({ file, removeItemCallback }: Props) => {
         return <CodeIcon sx={iconStyle} />;
       case 'pdf':
         return <PdfIcon sx={iconStyle} />;
+      case 'text':
       default:
         return <DefaultFileIcon sx={iconStyle} />;
     }
