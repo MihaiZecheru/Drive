@@ -7,6 +7,7 @@ import useInfoModal from './base/useInfoModal';
 import { FileID, FolderID } from "../database/ID";
 import FileDetailsCard from "./FileDetailsCard";
 import { GetFileFromGDrive } from "../database/GoogleDrive";
+import { GetUserID } from "../database/GetUser";
 
 const ViewFilePage = () => {
   const { id } = useParams();
@@ -14,6 +15,7 @@ const ViewFilePage = () => {
 
   const { showInfoModal } = useInfoModal();
   const [loading, setLoading] = useState(true);
+  const [allowedToView, setAllowedToView] = useState(false);
   const [file, setFile] = useState<TFile | null>(null);
   const [fileDoesntExist, setFileDoesntExist] = useState(false);
   const [contentBlob, setContentBlob] = useState<Blob | null>(null);
@@ -27,12 +29,14 @@ const ViewFilePage = () => {
     const start_ms = Date.now();
 
     Database.GetFile(id as FileID)
-      .then((_file: TFile) => {
+      .then(async (_file: TFile) => {
+        setFile(_file);
+        if (_file.user_id === await GetUserID()) {
+          setAllowedToView(true);
+        }
         if (Date.now() - start_ms < min_loading_time) {
           setTimeout(() => setLoading(false), min_loading_time - (Date.now() - start_ms));
         }
-
-        setFile(_file);
         GetFileFromGDrive(_file.gdrive_file_id)
           .then((blob: Blob) => setContentBlob(blob));
         Database.GetUserRootFolderID()
@@ -44,7 +48,7 @@ const ViewFilePage = () => {
         } else {
           showInfoModal('Error', 'Internal server error.');
         }
-        
+
         if (Date.now() - start_ms < min_loading_time) {
           setTimeout(() => setLoading(false), min_loading_time - (Date.now() - start_ms));
         }
@@ -56,6 +60,14 @@ const ViewFilePage = () => {
     return (
       <div className="viewFilePage" style={{ overflow: 'hidden', width: '100vw', height: '100vh' }}>
         <h1 style={{ marginLeft: '1rem',  }}>Invalid file ID</h1>
+      </div>
+    );
+  }
+
+  if (!loading && !allowedToView) {
+    return (
+      <div className="viewFilePage" style={{ overflow: 'hidden', width: '100vw', height: '100vh' }}>
+        <h1 style={{ marginLeft: '1rem',  }}>You do not have permission to view this file</h1>
       </div>
     );
   }
