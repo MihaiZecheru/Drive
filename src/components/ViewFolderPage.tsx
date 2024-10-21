@@ -94,7 +94,7 @@ const ViewFolderPage = () => {
   };
 
   // 1.5 seconds min loading time
-  const minimum_load_time: number = 1500;
+  const minimum_load_time: number = 750;
 
   useEffect(() => {
     setLoading(true);

@@ -25,7 +25,7 @@ const ViewFilePage = () => {
   const [popperOpen, setPopperOpen] = useState(false);
 
   useEffect(() => {
-    const min_loading_time = 1500;
+    const min_loading_time = 750;
     const start_ms = Date.now();
 
     Database.GetFile(id as FileID)
@@ -161,7 +161,7 @@ const ViewFilePage = () => {
                     navigate(`/folder/${file?.folder_id}`)
                 }}
               >
-                Open Folder
+                Open Parent Folder
               </Button>
             </Tooltip>
 
