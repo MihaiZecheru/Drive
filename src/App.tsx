@@ -6,6 +6,7 @@ import Landing from './components/base/Landing';
 import Logout from './components/base/Logout';
 import { ModalProvider } from './components/base/useInfoModal';
 import ViewFilePage from './components/ViewFilePage';
+import ShareFile from './components/ShareFile';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Route path="/" element={ <Authenticator component={ <Landing /> } /> } />
           <Route path="/login" element={ <LoginRegister /> } />
           <Route path="/logout" element={ <Logout /> } />
+          <Route path="/share/:id" element={ <ShareFile /> } />
 
           { /* Restricted access - authentication required */ }
           <Route path="/home" element={ <Authenticator component={ <Home /> } /> } />
