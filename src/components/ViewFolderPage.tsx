@@ -2,17 +2,18 @@ import { styled } from '@mui/material/styles';
 import Button from '@mui/material/Button';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
-import '../../styles/Home.css';
-import Folder from '../FolderCard';
-import File from '../FileCard';
+import '../styles/Home.css';
+import Folder from './FolderCard';
+import File from './FileCard';
 import { CircularProgress, Paper, Skeleton, Tooltip } from '@mui/material';
-import Database from '../../database/Database';
-import { TFile, TFolder } from '../../database/types';
+import Database from '../database/Database';
+import { TFile, TFolder } from '../database/types';
 import { useEffect, useState } from 'react';
-import useInfoModal from './useInfoModal';
-import { FolderID } from '../../database/ID';
-import CreateFolderModal from '../FormDialog';
-import useWindowSize from '../useWindowSize';
+import useInfoModal from './base/useInfoModal';
+import { FolderID } from '../database/ID';
+import CreateFolderModal from './FormDialog';
+import useWindowSize from './useWindowSize';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -34,7 +35,14 @@ const FolderGrid = styled('div')({
   placeItems: 'center',
 });
 
-const Home = () => {
+const ViewFolderPage = () => {
+  let { id: id_param } = useParams();
+
+  if (!id_param) {
+    id_param = '__ROOT__';
+  }
+
+  const navigate = useNavigate();
   const { showInfoModal } = useInfoModal();
   const [createFolderModalIsOpen, setCreateFolderModalIsOpen] = useState<boolean>(false);
   const [rootFolderID, setRootFolderID] = useState<FolderID>(null as unknown as FolderID);
@@ -42,6 +50,8 @@ const Home = () => {
   const [uploadingCount, setUploadingCount] = useState<number>(0);
   const [folders, setFolders] = useState<TFolder[]>([]);
   const [files, setFiles] = useState<TFile[]>([]);
+  const [activeFolder, setActiveFolder] = useState<TFolder | null>(null);
+  const [viewFolderID, setViewFolderID] = useState<FolderID>(null as unknown as FolderID);
   const { width } = useWindowSize();
 
   // Card height + 1rem
@@ -64,9 +74,12 @@ const Home = () => {
   };
 
   const uploadFiles = (_files: File[]) => {
+    // If the active folder hasn't loaded yet
+    if (!activeFolder) alert('Error uploading. Try again.');
+
     setUploadingCount(_files.length);
     // any file uploaded on this page goes in the root folder
-    const filePromises = _files.map(async (file: File) => Database.UploadFile(rootFolderID, file));
+    const filePromises = _files.map(async (file: File) => Database.UploadFile(activeFolder!.id, file));
     
     Promise.all(filePromises)
       .then((_files: TFile[]) => {
@@ -84,39 +97,56 @@ const Home = () => {
   const minimum_load_time: number = 1500;
 
   useEffect(() => {
-    const start = new Date().getTime();
-    Database.GetAllFolders()
-      .then((folders: TFolder[]) => {
-        setFolders(folders.filter((folder) => folder.name !== '__ROOT__'));
-      })
-      .catch((error) => {
-        console.error(error);
-        showInfoModal("Failed to load folders", error.message);
-      });
+    setLoading(true);
+    setFiles([]);
+    setFolders([]);
+    setActiveFolder(null);
+    setCreateFolderModalIsOpen(false);
+    setUploadingCount(0);
 
-    Database.GetUserRootFolderID()
-      .then((folderID: FolderID) => setRootFolderID(folderID));
+    (async () => {
+      const start = new Date().getTime();
 
-    Database.GetAllFiles()
-      .then((files: TFile[]) => {
-        setFiles(files);
-        const end = new Date().getTime();
-        if (end - start < minimum_load_time) {
-          setTimeout(() => setLoading(false), minimum_load_time - (end - start));
-        } else setLoading(false);
-      })
-      .catch((error) => {
-        console.error(error);
-        showInfoModal("Failed to load files", error.message);
-      });
-  }, [showInfoModal]);
+      const root_folder_id = await Database.GetUserRootFolderID();
+      setRootFolderID(root_folder_id);
+
+      // Folder to view
+      const _viewFolderID: FolderID = (id_param === '__ROOT__' ? root_folder_id : id_param) as FolderID;
+      setViewFolderID(_viewFolderID);
+
+      Database.GetFolder(_viewFolderID)
+        .then((f: TFolder) => setActiveFolder(f));
+
+      Database.GetSubfolders(_viewFolderID)
+        .then((folders: TFolder[]) => {
+          setFolders(folders.filter((folder) => folder.name !== '__ROOT__'));
+        })
+        .catch((error) => {
+          console.error(error);
+          showInfoModal("Failed to load folders", error.message);
+        });
+  
+      Database.GetFilesInFolder(_viewFolderID)
+        .then((files: TFile[]) => {
+          setFiles(files);
+          const end = new Date().getTime();
+          if (end - start < minimum_load_time) {
+            setTimeout(() => setLoading(false), minimum_load_time - (end - start));
+          } else setLoading(false);
+        })
+        .catch((error) => {
+          console.error(error);
+          showInfoModal("Failed to load files", error.message);
+        });
+    })();
+  }, [showInfoModal, navigate, id_param]);
 
   const launchCreateFolderPopup = () => {
     setCreateFolderModalIsOpen(true);
   };
 
   const createFolder = (folder_name: string) => {
-    Database.CreateFolder(folder_name, rootFolderID)
+    Database.CreateFolder(folder_name, viewFolderID)
       .then((folder: TFolder) => {
         setFolders([...folders, folder]);
         setCreateFolderModalIsOpen(false);
@@ -146,9 +176,31 @@ const Home = () => {
         overflowY: 'hidden',
         backgroundColor: '#1976d2',
       }}>
-        <Tooltip title="Currently viewing the root folder" placement='left-end'>
-          <h1 style={{ 'margin': 0, color: 'white' }} className="no-highlight">Saved Documents</h1>
-        </Tooltip>
+          <h1 style={{ 'margin': 0, color: 'white' }} className="no-highlight">
+            <Tooltip title="Return home" placement='top'>
+              <span
+                onClick={() => navigate('/home')}
+                style={{ cursor: 'pointer' }}
+              >Saved Documents / </span>
+            </Tooltip>
+            {
+              loading || !activeFolder
+              ? '...'
+              : (activeFolder.id === rootFolderID)
+                ? 'Home'
+                : activeFolder.parent_folder_id === rootFolderID
+                  ? activeFolder.name
+                  : <div style={{ display: 'inline' }}>
+                      <Tooltip title="View parent" placement='top'>
+                        <span
+                          onClick={() => navigate(`/folder/${activeFolder.parent_folder_id}`)}
+                          style={{ cursor: 'pointer' }}
+                        >... / </span>
+                      </Tooltip>
+                      <span>{activeFolder.name}</span>
+                    </div>
+            }
+          </h1>
         <div className="header-buttons">
           <Paper elevation={3} sx={{ marginRight: '1rem' }}>
             <Button
@@ -254,4 +306,4 @@ const Home = () => {
   );
 }
  
-export default Home;
+export default ViewFolderPage;

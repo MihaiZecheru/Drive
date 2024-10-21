@@ -8,11 +8,15 @@ import { TFile, TFileType, TFolder } from "./types";
  * Class for interacting with the Supabase database
  */
 export default class Database {
-  public static async GetAllFolders(): Promise<TFolder[]> {
+  /**
+   * @param folder_id The ID of the folder to get the subfolders of
+   */
+  public static async GetSubfolders(folder_id: FolderID): Promise<TFolder[]> {
     return new Promise(async (resolve, reject) => {
       const { data, error } = await supabase
         .from('Folders')
         .select('*')
+        .eq('parent_folder_id', folder_id)
         .eq('user_id', await GetUserID());
 
       if (error)
@@ -22,11 +26,12 @@ export default class Database {
     });
   }
 
-  public static async GetAllFiles(): Promise<TFile[]> {
+  public static async GetFilesInFolder(folder_id: FolderID): Promise<TFile[]> {
     return new Promise(async (resolve, reject) => {
       const { data, error } = await supabase
         .from('Files')
         .select('*')
+        .eq('folder_id', folder_id)
         .eq('user_id', await GetUserID());
 
       if (error)
@@ -162,5 +167,36 @@ export default class Database {
     if (error) throw error;
     if (data!.length === 0) throw new Error('File does not exist');
     return data![0] as TFile;
+  }
+
+  /**
+   * Check if the given ID corresponds to a folder.
+   * 
+   * @param folder_id Check if the folder with this ID exists
+   * @returns True if the folder with the given ID exists, false otherwise 
+   */
+  public static async FolderExists(folder_id: FolderID): Promise<boolean> {
+    const { data, error } = await supabase
+      .from('Folders')
+      .select('id')
+      .eq('id', folder_id)
+      .eq('user_id', await GetUserID());
+
+    if (error) throw error;
+    return data!.length !== 0;
+  }
+
+  /**
+   * Get an entry from the Folders table in the supabase database
+   */
+  public static async GetFolder(folder_id: FolderID): Promise<TFolder> {
+    const { data, error } = await supabase
+      .from('Folders')
+      .select('*')
+      .eq('id', folder_id)
+      .eq('user_id', await GetUserID());
+
+    if (error) throw error;
+    return data![0] as TFolder;
   }
 }

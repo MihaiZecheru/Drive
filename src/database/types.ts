@@ -10,6 +10,7 @@ export type TFolder = {
   id: FolderID;
   name: string;
   createdAt: Date;
+  parent_folder_id: FolderID | null;
 }
 
 /**

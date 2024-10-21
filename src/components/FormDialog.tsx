@@ -40,7 +40,7 @@ export default function CreateFolderModal({ _open, _setOpen, onFolderNameSubmit 
             const folder_name = formJson.folder_name;
 
             if (folder_name === '__ROOT__') {
-              alert('Cannot create folder with name "__root__"');
+              alert(`Cannot create folder with name '__ROOT__'`);
               return;
             }
 
