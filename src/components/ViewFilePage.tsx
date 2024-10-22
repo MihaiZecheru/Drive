@@ -37,6 +37,7 @@ const ViewFilePage = () => {
           setAllowedToView(true);
         }
 
+        // Keep this! The loading happens in two parts. First the supabase then the gdrive
         if (Date.now() - start_ms < min_loading_time) {
           setTimeout(() => setLoading(false), min_loading_time - (Date.now() - start_ms));
         }
