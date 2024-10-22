@@ -108,7 +108,7 @@ export default class Database {
     const codeExtensions = [
       'js', 'ts', 'py', 'java', 'cpp', 'c', 'cs', 'rb', 'php', 'html', 'css', 'go', 'rs', 'swift', 
       'kt', 'lua', 'sh', 'bat', 'sql', 'pl', 'r', 'xml', 'json', 'yaml', 'yml', 'toml', 'ini',
-      'jsx', 'tsx', 'ejs', 'h', 'hpp', 'html', 'php', 'xaml'
+      'jsx', 'tsx', 'ejs', 'h', 'hpp', 'html', 'php', 'xaml', 'csproj', 'sln', 'c++', 'h++'
     ];
 
     if (mimeType.startsWith('image/')) {
@@ -119,10 +119,10 @@ export default class Database {
       return 'audio';
     } else if (mimeType.startsWith('video/')) {
       return 'video';
-    } else if (mimeType === 'text/plain') {
-      return 'text';
     } else if (codeExtensions.includes(extension)) {
       return 'code';
+    } else if (mimeType === 'text/plain') {
+      return 'text';
     } else {
       return 'other';
     }
@@ -141,6 +141,18 @@ export default class Database {
       .eq('name', '__ROOT__');
 
     if (error) throw error;
+
+    // If the user does not have a root folder, create one
+    if (data!.length === 0) {
+      const { data, error } = await supabase
+        .from('Folders')
+        .insert({ user_id: await GetUserID(), name: '__ROOT__', parent_folder_id: null })
+        .select('id');
+
+      if (error) throw error;
+      return data![0].id as FolderID;
+    }
+
     else return data![0].id as FolderID;
   }
 
