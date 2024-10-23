@@ -215,7 +215,7 @@ const ViewFilePage = () => {
                 }}
                 ref={popperAnchor}
               >
-                Copy Download Link
+                Copy Share Link
               </Button>
             </Tooltip>
 
