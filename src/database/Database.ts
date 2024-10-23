@@ -214,4 +214,17 @@ export default class Database {
     if (error) throw error;
     return data![0] as TFolder;
   }
+
+  /**
+   * @param color Default is '#1976d2' 
+   */
+  public static async SetFolderColor(folder_id: FolderID, color: string = '#1976d2'): Promise<void> {
+    const { error } = await supabase
+      .from('Folders')
+      .update({ color })
+      .eq('id', folder_id)
+      .eq('user_id', await GetUserID());
+
+    if (error) throw error;
+  }
 }

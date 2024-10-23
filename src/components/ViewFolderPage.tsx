@@ -272,6 +272,7 @@ const ViewFolderPage = () => {
               key={index}
               name={folder.name}
               folderID={folder.id}
+              folder_color={folder.color}
               removeItemCallback={removeFolder}
             />
           })

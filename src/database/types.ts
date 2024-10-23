@@ -9,6 +9,7 @@ export type TFolder = {
   user_id: UserID;
   id: FolderID;
   name: string;
+  color: string;
   createdAt: Date;
   parent_folder_id: FolderID | null;
 }
