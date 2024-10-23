@@ -1,4 +1,4 @@
-import { Card, CardContent, Typography, CardActions, Tooltip, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from '@mui/material';
+import { Card, CardContent, Typography, CardActions, Tooltip, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 import { Folder as FolderIcon } from '@mui/icons-material';
 import { FolderID } from '../database/ID';
 import DeleteItemButton from './DeleteItemButton';
@@ -103,7 +103,7 @@ const FolderCard = ({ name, folderID, folder_color, removeItemCallback }: Props)
         aria-describedby="alert-dialog-description"
       >
         <DialogTitle id="alert-dialog-title">
-          Set Folder Color
+          Set Icon Color
         </DialogTitle>
         <DialogContent>
           <CirclePicker

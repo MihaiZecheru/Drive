@@ -9,7 +9,7 @@ export type TFolder = {
   user_id: UserID;
   id: FolderID;
   name: string;
-  color: string;
+  color: string; // hex
   createdAt: Date;
   parent_folder_id: FolderID | null;
 }
@@ -22,6 +22,7 @@ export type TFile = {
   id: FileID;
   name: string;
   type: TFileType;
+  color: string; // hex
   size: number;
   folder_id: FolderID;
   gdrive_file_id: string;

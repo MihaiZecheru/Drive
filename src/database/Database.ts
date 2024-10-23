@@ -108,7 +108,7 @@ export default class Database {
     const codeExtensions = [
       'js', 'ts', 'py', 'java', 'cpp', 'c', 'cs', 'rb', 'php', 'html', 'css', 'go', 'rs', 'swift', 
       'kt', 'lua', 'sh', 'bat', 'sql', 'pl', 'r', 'xml', 'json', 'yaml', 'yml', 'toml', 'ini',
-      'jsx', 'tsx', 'ejs', 'h', 'hpp', 'html', 'php', 'xaml', 'csproj', 'sln', 'c++', 'h++'
+      'jsx', 'tsx', 'ejs', 'h', 'hpp', 'html', 'php', 'xaml', 'csproj', 'sln', 'c++', 'h++', 'csv'
     ];
 
     if (mimeType.startsWith('image/')) {
@@ -221,8 +221,21 @@ export default class Database {
   public static async SetFolderColor(folder_id: FolderID, color: string = '#1976d2'): Promise<void> {
     const { error } = await supabase
       .from('Folders')
-      .update({ color })
+      .update({ color: color })
       .eq('id', folder_id)
+      .eq('user_id', await GetUserID())
+      
+      if (error) throw error;
+  }
+
+  /**
+   * @param color Default is '#1976d2'
+   */
+  public static async SetFileColor(file_id: FileID, color: string = '#1976d2'): Promise<void> {
+    const { error } = await supabase
+      .from('Files')
+      .update({ color: color })
+      .eq('id', file_id)
       .eq('user_id', await GetUserID());
 
     if (error) throw error;
