@@ -270,9 +270,7 @@ const ViewFolderPage = () => {
           !loading && folders.map((folder: TFolder, index: number) => {
             return <Folder
               key={index}
-              name={folder.name}
-              folderID={folder.id}
-              folder_color={folder.color}
+              folder={folder}
               removeItemCallback={removeFolder}
             />
           })

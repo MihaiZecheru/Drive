@@ -8,19 +8,18 @@ import { useState } from 'react';
 import { CirclePicker } from 'react-color';
 import Database from '../database/Database';
 import useInfoModal from './base/useInfoModal';
+import { TFolder } from '../database/types';
 
 interface Props {
-  name: string;
-  folderID: FolderID;
-  folder_color: string; // hex
+  folder: TFolder;
   removeItemCallback: (itemID: FolderID) => void;
 }
 
-const FolderCard = ({ name, folderID, folder_color, removeItemCallback }: Props) => {
+const FolderCard = ({ folder, removeItemCallback }: Props) => {
   const navigate = useNavigate();
   const { showInfoModal } = useInfoModal();
   const [modalOpen, setModalOpen] = useState<boolean>(false);
-  const [color, setColor] = useState<string>(folder_color);
+  const [color, setColor] = useState<string>(folder.color);
 
   const handleModalClose = () => {
     setModalOpen(false);
@@ -34,7 +33,7 @@ const FolderCard = ({ name, folderID, folder_color, removeItemCallback }: Props)
 
   const changeColor = () => {
     // Change the color of the folder in the database
-    Database.SetFolderColor(folderID, color)
+    Database.SetFolderColor(folder.id, color)
       .catch((error) => {
         console.error(error);
         showInfoModal('Error', 'Could not update color due to internal server error');
@@ -65,10 +64,10 @@ const FolderCard = ({ name, folderID, folder_color, removeItemCallback }: Props)
             cursor: 'pointer'
           }}
           className='no-highlight'
-          onClick={() => navigate(`/folder/${folderID}`)}
+          onClick={() => navigate(`/folder/${folder.id}`)}
         >
           <FolderIcon sx={{ fontSize: 40, marginRight: 1, color: color }} onContextMenu={handleRightClick} />
-          <Tooltip title={name} placement="top-start">
+          <Tooltip title={folder.name} placement="top-start">
             <Typography
               variant="h6"
               component="div"
@@ -79,7 +78,7 @@ const FolderCard = ({ name, folderID, folder_color, removeItemCallback }: Props)
                 textOverflow: 'ellipsis',
               }}
             >
-              {name}
+              {folder.name}
             </Typography>
           </Tooltip>
         </CardContent>
@@ -91,8 +90,8 @@ const FolderCard = ({ name, folderID, folder_color, removeItemCallback }: Props)
             borderTop: '1px solid #e0e0e0',
           }}
         >
-          <OpenItemButton itemID={folderID} itemType="folder"></OpenItemButton>
-          <DeleteItemButton itemID={folderID} itemType="folder" removeItemCallback={removeItemCallback}/>
+          <OpenItemButton itemID={folder.id} itemType="folder"></OpenItemButton>
+          <DeleteItemButton itemID={folder.id} itemType="folder" removeItemCallback={removeItemCallback}/>
         </CardActions>
       </Card>
 
