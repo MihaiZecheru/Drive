@@ -52,7 +52,10 @@ const ShareFile = () => {
 
   return (
     <div style={{ overflow: 'hidden' }}>
-      <h1 style={{ marginLeft: '1rem' }}>{downloadFinished ? 'Download finished' : 'Downloading file...' }</h1>
+      <h1 style={{ marginLeft: '1rem' }}>{downloadFinished ? 'Download finished' : 'Downloading file... please be patient' }</h1>
+      {!downloadFinished && <p style={{ marginLeft: '1rem' }}>
+        Don't worry if there's no download indicator. It's happening behind the scenes
+      </p>}
     </div>
   );
 }
