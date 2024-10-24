@@ -5,7 +5,7 @@ import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
 import '../styles/Home.css';
 import Folder from './FolderCard';
 import File from './FileCard';
-import { CircularProgress, Paper, Skeleton, Tooltip } from '@mui/material';
+import { Avatar, CircularProgress, IconButton, Menu, MenuItem, Paper, Skeleton, Tooltip } from '@mui/material';
 import Database from '../database/Database';
 import { TFile, TFolder } from '../database/types';
 import { useEffect, useState } from 'react';
@@ -14,6 +14,8 @@ import { FolderID } from '../database/ID';
 import CreateFolderModal from './FormDialog';
 import useWindowSize from './useWindowSize';
 import { useNavigate, useParams } from 'react-router-dom';
+import supabase from '../database/supabase-config';
+import { UserResponse } from '@supabase/supabase-js';
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -52,6 +54,8 @@ const ViewFolderPage = () => {
   const [files, setFiles] = useState<TFile[]>([]);
   const [activeFolder, setActiveFolder] = useState<TFolder | null>(null);
   const [viewFolderID, setViewFolderID] = useState<FolderID>(null as unknown as FolderID);
+  const [pfp, setPfp] = useState<string>('');
+  const [anchorElement, setAnchorElement] = useState<null | HTMLElement>(null);
   const { width } = useWindowSize();
 
   // Card height + 1rem
@@ -138,7 +142,19 @@ const ViewFolderPage = () => {
           console.error(error);
           showInfoModal("Failed to load files", error.message);
         });
+
+      supabase.auth.getUser().then((response: UserResponse) => {
+        if (response.error) {
+          console.error(response.error);
+          showInfoModal("Failed to load user", response.error.message);
+          return;
+        }
+
+        setPfp(response.data.user.user_metadata.avatar_url);
+      });
     })();
+
+    
   }, [showInfoModal, navigate, id_param]);
 
   const launchCreateFolderPopup = () => {
@@ -242,6 +258,22 @@ const ViewFolderPage = () => {
               />
             </Button>
           </Paper>
+
+          <div>
+            <IconButton onClick={(event) => setAnchorElement(event.currentTarget)}>
+              <Avatar alt="Profile Picture" src={pfp} sx={{ marginLeft: '1rem'}} />
+            </IconButton>
+            <Menu
+              anchorEl={anchorElement}
+              open={Boolean(anchorElement)}
+              onClose={() => setAnchorElement(null)}
+            >
+              <MenuItem onClick={() => {
+                setAnchorElement(null)
+                navigate('/logout');
+              }}>Logout</MenuItem>
+            </Menu>
+          </div>
         </div>
       </Paper>
 
