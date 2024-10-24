@@ -6,7 +6,7 @@ export async function UploadFileToGDrive(file: File): Promise<string> {
   const formData = new FormData();
   formData.append('file', file);
 
-  return await fetch('http://localhost:3005/gdrive/upload', {
+  return await fetch('https://drive.mzecheru.com/gdrive/upload', {
     method: 'POST',
     body: formData
   })
@@ -29,7 +29,7 @@ export async function UploadFileToGDrive(file: File): Promise<string> {
  * @param fileID The ID of the file in google drive
  */
 export async function GetFileFromGDrive(fileID: string): Promise<Blob> {
-  return await fetch(`http://localhost:3005/gdrive/download/${fileID}`)
+  return await fetch(`https://drive.mzecheru.com/gdrive/download/${fileID}`)
     .then(async (res) => {
       if (!res.ok) {
         throw new Error(`HTTP error. status: ${res.status}`);

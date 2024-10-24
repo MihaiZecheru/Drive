@@ -10,7 +10,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3005;
+const PORT = process.env.PORT;
 
 app.use(cors());
 const upload = multer({ dest: 'uploads/' }); // Temporary storage for uploaded files
