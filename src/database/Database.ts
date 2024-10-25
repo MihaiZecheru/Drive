@@ -75,17 +75,15 @@ export default class Database {
    * Upload's a file to Google Drive and saves its information to the supabase database
    * @param local_location The ID of the parent folder
    * @returns The TFile object that has information on the uploaded file
+   * @throws Error if the upload failed or if the file is too big
    */
   public static async UploadFile(parent_folder_ID: FolderID, file: File): Promise<TFile> {
     const user_id = await GetUserID();
     
+    // Will throw error if the upload failed or if the file is too big
     let gdrive_file_id: string;
-    try {
-      gdrive_file_id = await UploadFileToGDrive(file);
-    } catch {
-      throw new Error('Failed to upload file to Google Drive');
-    }
-
+    gdrive_file_id = await UploadFileToGDrive(file);
+    
     const { data, error } = await supabase
       .from('Files')
       .insert({
