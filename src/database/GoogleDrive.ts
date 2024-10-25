@@ -3,6 +3,11 @@
  * @returns The ID of the uploaded file in Google Drive
  */
 export async function UploadFileToGDrive(file: File): Promise<string> {
+  const TEN_MB = 10 * 1024 * 1024;
+  if (file.size > TEN_MB) {
+    throw new Error(`File '${file.name}' is too big. Max size is 10MB and the file is ${file.size} bytes`);
+  }
+  
   const formData = new FormData();
   formData.append('file', file);
 
