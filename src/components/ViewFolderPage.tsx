@@ -45,7 +45,7 @@ const ViewFolderPage = () => {
   }
 
   const navigate = useNavigate();
-  const { showInfoModal } = useInfoModal();
+  const showInfoModal = useInfoModal();
   const [createFolderModalIsOpen, setCreateFolderModalIsOpen] = useState<boolean>(false);
   const [rootFolderID, setRootFolderID] = useState<FolderID>(null as unknown as FolderID);
   const [loading, setLoading] = useState<boolean>(true);

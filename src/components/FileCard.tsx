@@ -27,7 +27,7 @@ interface Props {
 
 const FileCard = ({ file, removeItemCallback }: Props) => {
   const navigate = useNavigate();
-  const { showInfoModal } = useInfoModal();
+  const showInfoModal = useInfoModal();
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [color, setColor] = useState<string>(file.color);
 

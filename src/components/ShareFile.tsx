@@ -7,7 +7,7 @@ import supabase from "../database/supabase-config";
 const ShareFile = () => {
   const { id } = useParams();
   const [downloadFinished, setDownloadFinished] = useState(false);
-  const { showInfoModal } = useInfoModal();
+  const showInfoModal = useInfoModal();
 
   useEffect(() => {
     if (!id) return;

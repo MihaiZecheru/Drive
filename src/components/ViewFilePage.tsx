@@ -13,7 +13,7 @@ const ViewFilePage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const { showInfoModal } = useInfoModal();
+  const showInfoModal = useInfoModal();
   const [loading, setLoading] = useState(true);
   const [allowedToView, setAllowedToView] = useState(false);
   const [file, setFile] = useState<TFile | null>(null);

@@ -21,7 +21,7 @@ import supabase from '../../database/supabase-config';
 const LoginRegister: React.FC = () => {
   const [tabsValue, setTabsValue] = useState<number>(0);
   const navigate = useNavigate();
-  const { showInfoModal } = useInfoModal();
+  const showInfoModal = useInfoModal();
 
   const loginEmailRef = React.createRef<HTMLInputElement>();
   const loginPasswordRef = React.createRef<HTMLInputElement>();

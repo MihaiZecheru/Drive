@@ -13,7 +13,7 @@ interface Props {
 }
 
 const DeleteItemButton = ({ itemID, itemType, removeItemCallback }: Props) => {
-  const { showInfoModal } = useInfoModal();
+  const showInfoModal = useInfoModal();
   
   const deleteItem = async (itemID: FolderID | FileID) => {
     let promise: Promise<void>;

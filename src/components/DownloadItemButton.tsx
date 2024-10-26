@@ -8,7 +8,7 @@ interface Props {
 }
 
 const DownloadFileButton = ({ file }: Props) => {
-  const { showInfoModal } = useInfoModal();
+  const showInfoModal = useInfoModal();
 
   const downloadItem = async () => {
     await GetFileFromGDrive(file.gdrive_file_id).then((blob: Blob) => {

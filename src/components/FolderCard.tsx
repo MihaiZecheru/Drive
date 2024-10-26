@@ -17,7 +17,7 @@ interface Props {
 
 const FolderCard = ({ folder, removeItemCallback }: Props) => {
   const navigate = useNavigate();
-  const { showInfoModal } = useInfoModal();
+  const showInfoModal = useInfoModal();
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [color, setColor] = useState<string>(folder.color);
 

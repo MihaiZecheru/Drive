@@ -44,7 +44,7 @@ const useInfoModal = () => {
   if (context === undefined) {
     throw new Error('useModal must be used within a ModalProvider');
   }
-  return context;
+  return context.showInfoModal;
 };
 
 interface InfoModalProps {
