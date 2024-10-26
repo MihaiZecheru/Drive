@@ -114,7 +114,7 @@ const LoginRegister: React.FC = () => {
 
   const signInWithGoogle = async () => {
     const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options: {
-      redirectTo: process.env.REACT_APP_OAUTH_REDIRECT_URL }
+      redirectTo: 'https://drive.mzecheru.com/home' }
     });
 
     if (error) {
@@ -124,7 +124,7 @@ const LoginRegister: React.FC = () => {
 
   const signInWithGithub = async () => {
     const { error } = await supabase.auth.signInWithOAuth({ provider: 'github', options: {
-      redirectTo: process.env.REACT_APP_OAUTH_REDIRECT_URL }
+      redirectTo: 'https://drive.mzecheru.com/home' }
     });
     
     if (error) {
@@ -134,7 +134,7 @@ const LoginRegister: React.FC = () => {
 
   const signInWithDiscord = async () => {
     const { error } = await supabase.auth.signInWithOAuth({ provider: 'discord', options: {
-      redirectTo: process.env.REACT_APP_OAUTH_REDIRECT_URL }
+      redirectTo: 'https://drive.mzecheru.com/home' }
     });
 
     if (error) {
