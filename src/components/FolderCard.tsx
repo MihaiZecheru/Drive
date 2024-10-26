@@ -1,10 +1,10 @@
-import { Card, CardContent, Typography, CardActions, Tooltip, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
+import { Card, CardContent, Typography, CardActions, Tooltip, Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField } from '@mui/material';
 import { Folder as FolderIcon } from '@mui/icons-material';
 import { FolderID } from '../database/ID';
 import DeleteItemButton from './DeleteItemButton';
 import OpenItemButton from './OpenItemButton';
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { CirclePicker } from 'react-color';
 import Database from '../database/Database';
 import useInfoModal from './base/useInfoModal';
@@ -20,15 +20,28 @@ const FolderCard = ({ folder, removeItemCallback }: Props) => {
   const showInfoModal = useInfoModal();
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [color, setColor] = useState<string>(folder.color);
+  const textBoxRef = useRef<HTMLInputElement>(null);
+  const [renameFolderModalOpen, setRenameFolderModalOpen] = useState<boolean>(false);
+  const [folderName, setFolderName] = useState<string>(folder.name);
 
   const handleModalClose = () => {
     setModalOpen(false);
+  };
+
+  const handleRenameFolderModalClose = () => {
+    setRenameFolderModalOpen(false);
   };
 
   const handleRightClick = (e: any) => {
     e.preventDefault();
     e.stopPropagation();
     setModalOpen(true);
+  };
+
+  const handleRightClickOnName = (e: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setRenameFolderModalOpen(true);
   };
 
   const changeColor = () => {
@@ -43,9 +56,43 @@ const FolderCard = ({ folder, removeItemCallback }: Props) => {
       });
   };
 
+  const handleRenameSubmit = () => {
+    let newName = textBoxRef.current?.value?.trim();
+    setRenameFolderModalOpen(false);
+
+    if (!newName?.length) {
+      showInfoModal('Error', 'Folder name cannot be empty');
+      return;
+    }
+
+    const MAX_FOLDER_LENGTH = 255; // max length on windows
+    if (newName.length > MAX_FOLDER_LENGTH) {
+      showInfoModal('Error', `Folder name must be less than 255 chars but is ${newName.length} chars.`);
+      return;
+    }
+
+    if (newName === folder.name) return;
+
+    setRenameFolderModalOpen(false);
+    Database.RenameFile(folder.id, newName)
+      .then(() => setFolderName(newName!))
+      .catch((error: Error) => {
+        console.error(error);
+        showInfoModal('Error', 'Could not rename file due to internal server error');
+      });
+  };
+
+  useEffect(() => {
+    setTimeout(() => {
+      if (textBoxRef.current && renameFolderModalOpen) {
+        textBoxRef.current.select();
+      }
+    }, 250);
+  }, [renameFolderModalOpen]);
+
   return (
     // Disable the right click on the rest of the element
-    <div onContextMenu={(e) => e.preventDefault()}>
+    <div onContextMenu={handleRightClickOnName}>
       <Card
         sx={{
           maxWidth: '300px',
@@ -67,7 +114,7 @@ const FolderCard = ({ folder, removeItemCallback }: Props) => {
           onClick={() => navigate(`/folder/${folder.id}`)}
         >
           <FolderIcon sx={{ fontSize: 40, marginRight: 1, color: color }} onContextMenu={handleRightClick} />
-          <Tooltip title={folder.name} placement="top-start">
+          <Tooltip title={folderName} placement="top-start">
             <Typography
               variant="h6"
               component="div"
@@ -78,7 +125,7 @@ const FolderCard = ({ folder, removeItemCallback }: Props) => {
                 textOverflow: 'ellipsis',
               }}
             >
-              {folder.name}
+              {folderName}
             </Typography>
           </Tooltip>
         </CardContent>
@@ -120,6 +167,44 @@ const FolderCard = ({ folder, removeItemCallback }: Props) => {
         <DialogActions>
           <Button onClick={handleModalClose}>Close</Button>
           <Button onClick={changeColor} autoFocus>Change</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={renameFolderModalOpen}
+        onClose={handleRenameFolderModalClose}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{
+          component: 'div',
+          style: { width: '300px' }
+        }}
+      >
+        <DialogTitle>Rename Folder</DialogTitle>
+        <DialogContent>
+          <TextField
+            inputRef={textBoxRef}
+            autoFocus
+            autoComplete='off'
+            margin="dense"
+            id="file-name"
+            name="file-name"
+            label="File name"
+            type="text"
+            fullWidth
+            variant="standard"
+            defaultValue={folderName}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                handleRenameSubmit();
+              }
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleRenameFolderModalClose}>Cancel</Button>
+          <Button role="button" onClick={handleRenameSubmit}>Rename</Button>
         </DialogActions>
       </Dialog>
     </div>

@@ -1,4 +1,4 @@
-import { Card, CardContent, Typography, CardActions, Tooltip, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
+import { Card, CardContent, Typography, CardActions, Tooltip, Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField } from '@mui/material';
 import {
   Image as ImageIcon,
   Videocam as VideoIcon,
@@ -14,7 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { TFile } from '../database/types';
 import { CirclePicker } from 'react-color';
 import useInfoModal from './base/useInfoModal';
-import { useState } from 'react';
+import { createRef, useEffect, useState } from 'react';
 import Database from '../database/Database';
 
 interface Props {
@@ -28,17 +28,30 @@ interface Props {
 const FileCard = ({ file, removeItemCallback }: Props) => {
   const navigate = useNavigate();
   const showInfoModal = useInfoModal();
-  const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [iconColorModalOpen, setModalOpen] = useState<boolean>(false);
   const [color, setColor] = useState<string>(file.color);
+  const [renameFileModalOpen, setRenameFileModalOpen] = useState<boolean>(false);
+  const textBoxRef = createRef<HTMLInputElement>();
+  const [fileName, setFileName] = useState<string>(file.name);
 
-  const handleModalClose = () => {
+  const handleIconColorModalClose = () => {
     setModalOpen(false);
   };
 
-  const handleRightClick = (e: any) => {
+  const handleRenameFileModalClose = () => {
+    setRenameFileModalOpen(false);
+  };
+
+  const handleRightClickOnIcon = (e: any) => {
     e.preventDefault();
     e.stopPropagation();
     setModalOpen(true);
+  };
+
+  const handleRightClickOnName = (e: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setRenameFileModalOpen(true);
   };
 
   const changeColor = () => {
@@ -53,28 +66,66 @@ const FileCard = ({ file, removeItemCallback }: Props) => {
       });
   };
 
+  const handleRenameSubmit = () => {
+    let newName = textBoxRef.current?.value?.trim();
+    setRenameFileModalOpen(false);
+
+    if (!newName?.length) {
+      showInfoModal('Error', 'File name cannot be empty');
+      return;
+    }
+
+    const MAX_FILE_LENGTH = 255; // max length on windows
+    if (newName.length > MAX_FILE_LENGTH) {
+      showInfoModal('Error', `File name must be less than 255 chars but is ${newName.length} chars.`);
+      return;
+    }
+
+    if (newName === fileName) return;
+
+    const fileExtension: string = file.name.split('.').length >= 2 ? file.name.split('.').pop()! : '';
+    if (!newName.endsWith(fileExtension)) {
+      newName += '.' + fileExtension;
+    }
+
+    Database.RenameFile(file.id, newName)
+      .then(() => setFileName(newName!))
+      .catch((error: Error) => {
+        console.error(error);
+        showInfoModal('Error', 'Could not rename file due to internal server error');
+      });
+  };
+
   const iconStyle = { fontSize: 40, marginRight: 1, color: color };
 
   const iconCompontent = (fileType: string) => {
     switch (fileType) {
       case 'image':
-        return <ImageIcon sx={iconStyle} onContextMenu={handleRightClick} />;
+        return <ImageIcon sx={iconStyle} onContextMenu={handleRightClickOnIcon} />;
       case 'video':
-        return <VideoIcon sx={iconStyle} onContextMenu={handleRightClick} />;
+        return <VideoIcon sx={iconStyle} onContextMenu={handleRightClickOnIcon} />;
       case 'audio':
-        return <AudioIcon sx={iconStyle} onContextMenu={handleRightClick} />;
+        return <AudioIcon sx={iconStyle} onContextMenu={handleRightClickOnIcon} />;
       case 'code':
-        return <CodeIcon sx={iconStyle} onContextMenu={handleRightClick} />;
+        return <CodeIcon sx={iconStyle} onContextMenu={handleRightClickOnIcon} />;
       case 'pdf':
-        return <PdfIcon sx={iconStyle} onContextMenu={handleRightClick} />;
+        return <PdfIcon sx={iconStyle} onContextMenu={handleRightClickOnIcon} />;
       case 'text':
       default:
-        return <DefaultFileIcon sx={iconStyle} onContextMenu={handleRightClick} />;
+        return <DefaultFileIcon sx={iconStyle} onContextMenu={handleRightClickOnIcon} />;
     }
   }
 
+  useEffect(() => {
+    setTimeout(() => {
+      if (textBoxRef.current && renameFileModalOpen) {
+        textBoxRef.current.select();
+      }
+    }, 250);
+  }, [renameFileModalOpen]);
+
   return (
-    <div>
+    <div onContextMenu={handleRightClickOnName}>
       <Card
         sx={{
           maxWidth: '300px',
@@ -98,7 +149,7 @@ const FileCard = ({ file, removeItemCallback }: Props) => {
           
           { iconCompontent(file.type) }
 
-          <Tooltip title={file.name} placement="top-start">
+          <Tooltip title={fileName} placement="top-start">
             <Typography
               variant="h6"
               component="div"
@@ -109,7 +160,9 @@ const FileCard = ({ file, removeItemCallback }: Props) => {
                 textOverflow: 'ellipsis',
               }}
             >
-              {file.name}
+              <span onContextMenu={handleRightClickOnName}>
+                {fileName}
+              </span>
             </Typography>
           </Tooltip>
         </CardContent>
@@ -127,8 +180,8 @@ const FileCard = ({ file, removeItemCallback }: Props) => {
       </Card>
 
       <Dialog
-        open={modalOpen}
-        onClose={handleModalClose}
+        open={iconColorModalOpen}
+        onClose={handleIconColorModalClose}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
@@ -149,8 +202,46 @@ const FileCard = ({ file, removeItemCallback }: Props) => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleModalClose}>Close</Button>
+          <Button onClick={handleIconColorModalClose}>Close</Button>
           <Button onClick={changeColor} autoFocus>Change</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={renameFileModalOpen}
+        onClose={handleRenameFileModalClose}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{
+          component: 'div',
+          style: { width: '300px' }
+        }}
+      >
+        <DialogTitle>Rename File</DialogTitle>
+        <DialogContent>
+          <TextField
+            inputRef={textBoxRef}
+            autoFocus
+            autoComplete='off'
+            margin="dense"
+            id="file-name"
+            name="file-name"
+            label="File name"
+            type="text"
+            fullWidth
+            variant="standard"
+            defaultValue={fileName}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                handleRenameSubmit();
+              }
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleRenameFileModalClose}>Cancel</Button>
+          <Button role="button" onClick={handleRenameSubmit}>Rename</Button>
         </DialogActions>
       </Dialog>
     </div>

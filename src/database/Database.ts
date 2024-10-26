@@ -238,4 +238,24 @@ export default class Database {
 
     if (error) throw error;
   }
+
+  public static async RenameFile(file_id: FileID, new_name: string): Promise<void> {
+    const { error } = await supabase
+      .from('Files')
+      .update({ name: new_name })
+      .eq('id', file_id)
+      .eq('user_id', await GetUserID());
+
+    if (error) throw error;
+  }
+
+  public static async RenameFolder(folder_id: FolderID, new_name: string): Promise<void> {
+    const { error } = await supabase
+      .from('Folders')
+      .update({ name: new_name })
+      .eq('id', folder_id)
+      .eq('user_id', await GetUserID());
+
+    if (error) throw error;
+  }
 }
